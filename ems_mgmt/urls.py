@@ -36,6 +36,7 @@ apiv1_patterns = [
     path('env/', include('environment.urls')),
     path('workspace/', include('workspace.urls')),
     path('team/', include('team.urls')),
+    path('project/', include('project.urls')),
 ]
 
 urlpatterns = [

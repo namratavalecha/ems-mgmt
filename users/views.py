@@ -4,11 +4,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth import logout
-
+from rest_framework.views import APIView
 from . import serializers
 from .utils import get_and_authenticate_user, create_user_account
 from .models import Employee
 from workspace.models import Workspace
+from django.http import Http404
 
 # Create your views here.
 
@@ -67,3 +68,20 @@ class AuthViewSet(viewsets.GenericViewSet):
         if self.action in self.serializer_classes.keys():
             return self.serializer_classes[self.action]
         return super().get_serializer_class()
+
+
+class GetWorkspaceEmployee(APIView):
+    permission_classes = []
+
+    def get_object(self, request, workspace_id):
+        try:
+            return Employee.objects.filter(workspace__in=
+                Workspace.objects.filter(id=workspace_id).values('id'))
+        except:
+            raise Http404
+
+    def get(self, request, workspace_id, format=None):
+        employees = self.get_object(request, workspace_id)
+        serializer = serializers.AuthSerializer(employees, many=True)
+        serializer_data = serializer.data
+        return Response(serializer_data)
